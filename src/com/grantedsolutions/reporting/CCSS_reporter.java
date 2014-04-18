@@ -284,15 +284,6 @@ public class CCSS_reporter {
                         dmg.addItem(4-dok, blm-1, new DataMeme(new Integer(item.get("counter"))));
                     }
 
-                    /*
-                    if (sample.containsKey(CR)) {
-                        Integer c = new Integer(item.get("counter"));
-                        Integer c2 = sample.get(CR);
-                        sample.put(CR, c + c2);
-                    } else {
-                        sample.put(CR, new Integer(item.get("counter")));
-                    }
-                    */
                     
                     item.clear();
                     jump = false;
