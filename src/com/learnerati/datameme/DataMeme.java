@@ -150,7 +150,7 @@ public class DataMeme {
         } else if (_value instanceof Float) {
             return ((Float) _value).doubleValue();
         }
-
+        
         return null;
     }
 

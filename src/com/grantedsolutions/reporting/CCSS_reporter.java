@@ -65,7 +65,7 @@ public class CCSS_reporter {
                 + "ORDER BY BP.name, BSite.disname, BSite.schname, \n"
                 + "BC.gradeLevel, BC.subjectArea, MSC.sampleID, \n"
                 + "RD.groupingID, RD.dataName, RD.dataValue  ";
-                //+ "LIMIT 5000";
+        //+ "LIMIT 5000";
 
         ResultSet rs = DM.Execute(sql);
 
@@ -83,32 +83,24 @@ public class CCSS_reporter {
 
             Map<String, String> item = new HashMap<>();
             Map<String, Integer> sample = new HashMap<>();
-            
-            
+
             DMemeGrid dmg = new DMemeGrid();
-            
+
             dmg.setLabel("Cognitive Rigor: English Grade 2");
             dmg.setColDescriptor("This the column descriptor here");
             dmg.setRowDescriptor("This is the row descriptor here");
 
-            dmg.addRowLabel("Dok-4");
-            dmg.addRowLabel("Dok-3");
-            dmg.addRowLabel("Dok-2");
-            dmg.addRowLabel("Dok-1");
+            dmg.addRowLabel("DOK-4");
+            dmg.addRowLabel("DOK-3");
+            dmg.addRowLabel("DOK-2");
+            dmg.addRowLabel("DOK-1");
             dmg.addColLabel("BLM-1");
             dmg.addColLabel("BLM-2");
             dmg.addColLabel("BLM-3");
             dmg.addColLabel("BLM-4");
             dmg.addColLabel("BLM-5");
             dmg.addColLabel("BLM-6");
-            
-            
-            //dmg.addItem(0, 0, new DataMeme(100));
-            //dmg.addItem(0, 1, new DataMeme(101));
-            //dmg.addItem(1, 0, new DataMeme("", 200)); // just adding an emty label
-            //dmg.addItem(1, 1, new DataMeme("bogus", 201)); // just adding an bogus label       
-            //dmg.DumpGrid();            
-            
+           
             while (rs.next()) {
 
                 if (currentGroupingID > 0) {
@@ -124,39 +116,40 @@ public class CCSS_reporter {
 
                     if (rs.getInt("groupingID") != currentGroupingID) {
                         //currentGroupingID = rs.getString("groupingID");                        
-                        jump = true;                        
+                        jump = true;
                     }
                 }
-                
+
                 if (jump == true) {
 
                     String CR = String.format("%s:%s", item.get("dok"), item.get("blm"));
-                    
+
                     /*
-                    System.out.printf("\n%s \t%s \t%s \t%s \t%s",
-                            currentCollectorID, currentSampleID, currentGroupingID,
-                            CR, item.get("counter")
-                    );
-                    */
-                    
+                     System.out.printf("\n%s \t%s \t%s \t%s \t%s",
+                     currentCollectorID, currentSampleID, currentGroupingID,
+                     CR, item.get("counter")
+                     );
+                     */
                     
                     String[] rigor = CR.split(":");
                     int dok = new Integer(rigor[0].replace("DOK-", ""));
                     int blm = new Integer(rigor[1].replace("BLM-", ""));
                     
-                    //if (dok != null && blm != null) {
-                        if (item.get("counter") != null) {
-                            Integer i = new Integer(item.get("counter"));
+                    
+                    if (dmg.hasElement(4-dok, blm-1)) {
+                        int c = new Integer(item.get("counter"));
+                        
+                        int c2 = dmg.getItem(4-dok, blm-1).isNumeric() 
+                                ? dmg.getItem(4-dok, blm-1).asInteger() 
+                                : 0;                                                
+                        
+                        dmg.addItem(4-dok, blm-1, new DataMeme(c+c2));
+                    }
+                    else {
+                        dmg.addItem(4-dok, blm-1, new DataMeme(new Integer(item.get("counter"))));
+                    }
 
-                            
-                            dmg.addItem(dok, blm, new DataMeme(100));
 
-                            //System.out.printf("\n%d, %d, %d", dok, blm, new Integer(item.get("counter")));
-                        }
-                    //}
-                    
-                    
-                    
                     if (sample.containsKey(CR)) {
                         Integer c = new Integer(item.get("counter"));
                         Integer c2 = sample.get(CR);
@@ -177,8 +170,10 @@ public class CCSS_reporter {
 
             }
             System.out.println("");
-            
+
             displayMap(sample);
+
+            dmg.DumpGrid();
 
         } catch (SQLException ex) {
             Logger.getLogger(CCSS_reporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -186,11 +181,12 @@ public class CCSS_reporter {
 
     }
 
+    
     private void displayMap(Map mp) {
         Iterator it = mp.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pairs = (Map.Entry) it.next();
-            System.out.print("\n"+ pairs.getKey() + " = " + pairs.getValue());
+            System.out.print("\n" + pairs.getKey() + " = " + pairs.getValue());
             //it.remove(); // avoids a ConcurrentModificationException
         }
     }

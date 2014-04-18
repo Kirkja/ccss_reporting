@@ -496,6 +496,17 @@ public class DMemeGrid {
 
         return null;
     }
+    
+    
+    public boolean hasElement(int row, int col) {
+        if (row < Rows()) {
+            if (col < _grid.get(row).size()) {
+                return true;
+            }
+        }
+
+        return false;        
+    }
 
     //-----------------------------------------------------------------------
     /**
@@ -616,8 +627,12 @@ public class DMemeGrid {
                 _max = dml.Max();
             }
 
-            _min = (dml.Min() < _min) ? dml.Min() : _min;
-            _max = (dml.Max() > _max) ? dml.Max() : _max;
+            if (dml.Min() != null) {
+                _min = (dml.Min() < _min) ? dml.Min() : _min;
+            }
+            if (dml.Max() != null) {
+                _max = (dml.Max() > _max) ? dml.Max() : _max;
+            }
         }
     }
 

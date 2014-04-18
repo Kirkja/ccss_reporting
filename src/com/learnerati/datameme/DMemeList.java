@@ -262,8 +262,10 @@ public final class DMemeList implements Iterable<DataMeme> {
         
         for (DataMeme dm : _items)
         {
-            _sum    = (_sum == null)      ? dm.asDouble() : (_sum + dm.asDouble());
-            _abssum = (_abssum == null)   ? Math.abs(dm.asDouble()) : (_abssum + Math.abs(dm.asDouble()));
+            if (dm.isNumeric()) {
+                _sum    = (_sum == null)      ? dm.asDouble() : (_sum + dm.asDouble());
+                _abssum = (_abssum == null)   ? Math.abs(dm.asDouble()) : (_abssum + Math.abs(dm.asDouble()));
+            }        
         }
     }
     
