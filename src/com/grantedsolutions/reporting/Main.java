@@ -8,6 +8,15 @@ package com.grantedsolutions.reporting;
 import com.grantedsolutions.sql.DataManager;
 import java.sql.ResultSet;
 
+import com.learnerati.datameme.*;
+import com.grantedsolutions.chart.*;
+import com.grantedsolutions.utilities.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
 /**
  *
  * @author User1
@@ -24,9 +33,12 @@ public class Main {
         // Test DB connectivity
         //Test_A();
         
-        Test_B();
         
+        // Pull Review_data for English grade 2
+        //Test_B();
         
+        // Draw a rw CR Chart
+        Test_C();
         
         
         System.out.println("\nDone.\n");
@@ -63,7 +75,38 @@ public class Main {
         CCSS_reporter reporter = new CCSS_reporter();
         
         reporter.accessTree();
+    }
+    
+    
+    private static void Test_C() {
+        CCSS_reporter reporter = new CCSS_reporter();
+        
+        DMemeGrid dataGrid = reporter.getData();
+        
+        dataGrid.DumpGrid();
+        
+        // define some rules to use for the chart
+        Map<String,Object> rules = new HashMap<>();                
+        rules.put("OutFileName", "CognitiveRigorEnglish_2.svg");
+        rules.put("UseValueData", "true");
+        rules.put("UseCountData", "false");    
 
+        Chart_X1(dataGrid, rules);
+                
+        
     }
 
+
+    private static void Chart_X1(DMemeGrid grid, Map<String, Object> rules) {
+        
+        SVGBase svgb = new SVGBase().Create();
+
+        GridToChart graph = new GridToChart(svgb);
+        graph.setRules(rules);
+        graph.Build(grid);
+
+        graph.ToFile("C:\\TROLLCREST_ROOT\\images", rules.get("OutFileName").toString());        
+    }    
+    
+    
 }

@@ -12,8 +12,11 @@ import java.util.List;
 public class DMemeGrid {
 
     private String _label;
-    private Double _min;
-    private Double _max;
+    private Double _minValue;
+    private Double _maxValue;
+    private Double _totalValue; 
+    private Integer _totalCount;
+    
     private List<String> _rowLabels;
     private List<String> _colLabels;
     private String _rowDescriptor;
@@ -28,8 +31,8 @@ public class DMemeGrid {
      *
      */
     public DMemeGrid() {
-        _min = Double.MAX_VALUE;
-        _max = -Double.MAX_VALUE;
+        _minValue = Double.MAX_VALUE;
+        _maxValue = -Double.MAX_VALUE;
 
         _rowLabels = new ArrayList<>();
         _colLabels = new ArrayList<>();
@@ -76,7 +79,7 @@ public class DMemeGrid {
      * @return The maximum numeric value in the grid
      */
     public Double Min() {
-        return _min;
+        return _minValue;
     }
 
     /**
@@ -84,9 +87,40 @@ public class DMemeGrid {
      * @return The minimum numeric value in the grid
      */
     public Double Max() {
-        return _max;
+        return _maxValue;
     }
+    
+    
+    /**
+     *
+     * @return The count value for all elements
+     */
+    public Integer Count() {
+        return _totalCount;
+    }    
 
+    
+    /**
+     *
+     * @return The total value for all elements
+     */
+    public Double Total() {
+        return _totalValue;
+    } 
+    
+    
+    public boolean hasElement(int row, int col) {
+        if (row < Rows()) {
+            if (col < _grid.get(row).size()) {
+                return true;
+            }
+        }
+
+        return false;        
+    }    
+    
+    
+    
     //------------------------------------------------------------------------
     // Row related methods 
     //
@@ -496,17 +530,6 @@ public class DMemeGrid {
 
         return null;
     }
-    
-    
-    public boolean hasElement(int row, int col) {
-        if (row < Rows()) {
-            if (col < _grid.get(row).size()) {
-                return true;
-            }
-        }
-
-        return false;        
-    }
 
     //-----------------------------------------------------------------------
     /**
@@ -618,21 +641,28 @@ public class DMemeGrid {
      */
     private void setOutliers() {
 
+        _minValue = Double.MAX_VALUE;
+        _maxValue = Double.MIN_VALUE;
+        _totalCount = 0;
+        _totalValue = 0d;
+        
         for (DMemeList dml : _grid) {
-            if (_min == null) {
-                _min = dml.Min();
-            }
+            
+            if (dml.Min() != null && dml.Max() != null) {
+                if (_minValue == null) {
+                    _minValue = dml.Min();
+                }
 
-            if (_max == null) {
-                _max = dml.Max();
-            }
+                if (_maxValue == null) {
+                    _maxValue = dml.Max();
+                }
 
-            if (dml.Min() != null) {
-                _min = (dml.Min() < _min) ? dml.Min() : _min;
+                _minValue = (dml.Min() < _minValue) ? dml.Min() : _minValue;
+                _maxValue = (dml.Max() > _maxValue) ? dml.Max() : _maxValue;
             }
-            if (dml.Max() != null) {
-                _max = (dml.Max() > _max) ? dml.Max() : _max;
-            }
+            
+            _totalCount += dml.Counts();
+            _totalValue += dml.Sum() != null ? dml.Sum() : 0d;
         }
     }
 
@@ -643,10 +673,16 @@ public class DMemeGrid {
 
         String formatter = "%4s";
 
-        System.out.printf("\nDataGrid has the following attributes:\nTitle = [%s]\nMin = %f\nMax = %f\nRows = %d\nCols = %d\nColumn Labels = %s\nRow Labels = %s\nRowDesc = %s\nColDesc = %s",
-                getLabel(), Min(), Max(), Rows(), Cols(),
-                _colLabels.toString(),
-                _rowLabels.toString(),
+        System.out.printf("\nDataGrid has the following attributes:"
+                + "\nTitle = [%s]\nMin = %f\nMax = %f\nRows = %d\nCols = %d"
+                + "\nCount = %d " 
+                + "\nTotal = %f "
+                + "\nColumn Labels = %s\nRow Labels = %s"
+                + "\nRowDesc = %s\nColDesc = %s",
+                getLabel(), Min(), Max(), Rows(), Cols(), 
+                Count(),
+                Total(),
+                _colLabels.toString(), _rowLabels.toString(),
                 getRowDescriptor(), getColDescriptor());
 
         if (_rowSummary.size() > 0) {
@@ -660,7 +696,7 @@ public class DMemeGrid {
         for (DMemeList dml : _grid) {
             
             for (DataMeme dm : dml) {
-                System.out.printf("\t%s\t", dm.asText());
+                System.out.printf("%10s (%5d)", dm.asText(), dm.getCount());
             }
             System.out.println();
         }

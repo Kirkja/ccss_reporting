@@ -13,10 +13,12 @@ import java.util.List;
 public final class DMemeList implements Iterable<DataMeme> {
 
     private String _label = "";
-    private Double _min = Double.MAX_VALUE;
-    private Double _max = -Double.MAX_VALUE;
+    private Double _minValue = Double.MAX_VALUE;
+    private Double _maxValue = Double.MIN_VALUE;
     private Double _sum;
     private Double _abssum;
+    
+    private Integer _counts = 0;
     
     
     private List<DataMeme> _items = new ArrayList<>();
@@ -184,16 +186,16 @@ public final class DMemeList implements Iterable<DataMeme> {
     private void Outlier(Double n) {
         //if (n.IsNumeric())
         {
-            if (_min == null) {
-                _min = Double.MAX_VALUE;
+            if (_minValue == null) {
+                _minValue = Double.MAX_VALUE;
             }
 
-            if (_max == null) {
-                _max = Double.MIN_VALUE;
+            if (_maxValue == null) {
+                _maxValue = Double.MIN_VALUE;
             }
 
-            _min = (n < _min) ? n : _min;
-            _max = (n > _max) ? n : _max;
+            _minValue = (n < _minValue) ? n : _minValue;
+            _maxValue = (n > _maxValue) ? n : _maxValue;
         }
     }
 
@@ -208,8 +210,8 @@ public final class DMemeList implements Iterable<DataMeme> {
      *
      */
     private void setOutliers() {
-        _min = null;
-        _max = null;
+        _minValue = Double.MAX_VALUE;
+        _maxValue = Double.MIN_VALUE;
 
         for (DataMeme dm : _items) {
             if (dm.isNumeric()) {
@@ -223,7 +225,7 @@ public final class DMemeList implements Iterable<DataMeme> {
      * @return The minimum value in the List as a Double
      */
     public Double Min() {
-        return this._min;
+        return this._minValue;
     }
 
     /**
@@ -231,18 +233,26 @@ public final class DMemeList implements Iterable<DataMeme> {
      * @return The maximum value in the List as a Double
      */
     public Double Max() {
-        return this._max;
+        return this._maxValue;
     }
 
     /**
      * 
-     * @return 
+     * @return Return the total summed value
      */
     public Double Sum()
     {
         return _sum;
     }
-    
+ 
+    /**
+     * 
+     * @return The total counts for all elements of the list
+     */
+    public Integer Counts()
+    {
+        return _counts;
+    }    
     
     /**
      * 
@@ -254,18 +264,27 @@ public final class DMemeList implements Iterable<DataMeme> {
     }    
     
     
-    
+    /**
+     * 
+     */
     private void Summation()
     {
         _sum    = null;
         _abssum = null;
+        _counts = 0;
         
         for (DataMeme dm : _items)
         {
-            if (dm.isNumeric()) {
-                _sum    = (_sum == null)      ? dm.asDouble() : (_sum + dm.asDouble());
-                _abssum = (_abssum == null)   ? Math.abs(dm.asDouble()) : (_abssum + Math.abs(dm.asDouble()));
-            }        
+            //_sum    = _sum == null      ? dm.asDouble() : (_sum + dm.asDouble());
+            //_abssum = _abssum == null   ? Math.abs(dm.asDouble()) : (_abssum + Math.abs(dm.asDouble()));
+            
+            if (dm.asDouble() != null)
+            {
+                _sum    = _sum == null      ? dm.asDouble() : (_sum + dm.asDouble());
+                _abssum = _abssum == null   ? Math.abs(dm.asDouble()) : (_abssum + Math.abs(dm.asDouble()));
+            }
+            
+            _counts += dm.getCount();
         }
     }
     
@@ -294,7 +313,7 @@ public final class DMemeList implements Iterable<DataMeme> {
         }
 
         sb.append("]");
-        sb.append(String.format("\nmin:%f \nmax:%f", _min, _max));
+        sb.append(String.format("\nmin:%f \nmax:%f", _minValue, _maxValue));
 
         return sb.toString();
     }

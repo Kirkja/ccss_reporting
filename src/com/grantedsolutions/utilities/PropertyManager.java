@@ -1,4 +1,4 @@
-package com.grantedsolutionsi.utilities;
+package com.grantedsolutions.utilities;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

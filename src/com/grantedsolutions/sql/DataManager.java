@@ -1,6 +1,6 @@
 package com.grantedsolutions.sql;
 
-import com.grantedsolutionsi.utilities.PropertyManager;
+import com.grantedsolutions.utilities.PropertyManager;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;

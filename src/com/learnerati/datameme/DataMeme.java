@@ -11,7 +11,7 @@ public class DataMeme {
      * The data being stored
      */
     private Object _value;
-    
+    private Integer _count;
     /**
      *  The descriptive label for the data
      */
@@ -24,33 +24,33 @@ public class DataMeme {
     public DataMeme() {
         _value = null; //new Object();
         _label = new String();
+        _count = 0;
     }
 
     
     /**
      * Creates a DataMeme with the Object as its data
      * <p>
-     * This will expand the grid automatically to accommodate the position of the added item
      * 
      * @param obj Object to store as data 
      */
     public DataMeme(Object obj) {
         _value = obj;
         _label = new String();
+        if (obj != null) { _count = 1; }
     }
 
     
     /**
      * Creates a DataMeme with a label and the Object as its data
      * <p>
-     * This will expand the grid automatically to accommodate the position of the added item
-     * 
      * @param str  String to use as the descriptive label
      * @param obj  Object to store as data 
      */
     public DataMeme(String str, Object obj) {
         _value = obj;
         _label = str;
+        if (obj != null) { _count = 1; }
     }
 
     
@@ -92,6 +92,14 @@ public class DataMeme {
         return _value;
     }
 
+    /**
+     * Returns the value as an Object
+     * 
+     * @return The Object stored as data for this DataMeme
+     */
+    public Integer getCount() {
+        return _count;
+    }
     
     
     /**
@@ -150,7 +158,7 @@ public class DataMeme {
         } else if (_value instanceof Float) {
             return ((Float) _value).doubleValue();
         }
-        
+
         return null;
     }
 
@@ -207,6 +215,8 @@ public class DataMeme {
      * @param obj A Numeric object to sum with this DataMeme
      */
     public void sum(Object obj) {
+        if (_value == null) { _value = 0d; }
+        
         if (_value instanceof Number && obj instanceof Number) {
             Double v = _value instanceof Double
                     ? (Double) _value : _value instanceof Float
@@ -225,6 +235,8 @@ public class DataMeme {
                     ? tmp : _value instanceof Float
                     ? tmp.floatValue() : _value instanceof Integer
                     ? (int) (Math.round(tmp)) : null;
+            
+            if (_value != null) { _count+=1; }
         }
     }
     
@@ -236,7 +248,10 @@ public class DataMeme {
      * @param obj a DataMeme to sum with this item
      */
     public void sum(DataMeme obj) {
-         if (obj.isNumeric()) { this.sum(obj.getValue()); }
+         if (obj.isNumeric()) { 
+             this.sum(obj.getValue());              
+         }
+         if (obj != null) { _count +=1; }
     }
     
     
