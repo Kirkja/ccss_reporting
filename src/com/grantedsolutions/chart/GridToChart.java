@@ -28,7 +28,7 @@ public class GridToChart {
     private final int cellHeight = 50;
     private int gridInset = 0;
 
-    private final Double horzOffset = 35d;
+    private final Double horzOffset = 38d;
     private final Double vertOffset = 30d;
 
     private boolean useRowDescriptor = true;
@@ -80,7 +80,7 @@ public class GridToChart {
         
         base.CheckPoint(0.0, 0.0);
 
-        gridInset = cellWidth / 2 + 15;
+        gridInset = cellWidth / 2 + 12;
 
 
         Double X1 = 0d;
@@ -123,7 +123,7 @@ public class GridToChart {
         if (useRowDescriptor) {
             String str = grid.getRowDescriptor();
 
-            X1 = horzOffset - 25;
+            X1 = horzOffset - 22;
             Y1 = vertOffset + (rowCount * cellHeight) / 2 - cellHeight / 2;
 
             Element label = doc.createElementNS(null, "text");
@@ -165,7 +165,7 @@ public class GridToChart {
         }
 
         // place the coldescriptor --------------------------------------------
-        X1 = horzOffset + (colCount * cellWidth) / 2 + 15;
+        X1 = horzOffset + (colCount * cellWidth) / 2 + 12;
         Y1 += cellHeight / 2;
         if (useColDescriptor) {
             String str = grid.getColDescriptor();

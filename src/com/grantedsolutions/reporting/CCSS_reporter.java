@@ -186,11 +186,11 @@ public class CCSS_reporter {
     }
     
     
-    public DMemeGrid getData() {
+    public DMemeGrid getRigorData() {
         
         DMemeGrid dmg = new DMemeGrid();
-         
-         
+
+                  
         String sql = "SELECT \n"
                 + "  BP.accountID, MSP.projectID, MSP.siteID, BP.name AS projectName\n"
                 + ", BSite.disname AS districtName, BSite.schname AS schoolName\n"
@@ -300,6 +300,136 @@ public class CCSS_reporter {
         } catch (SQLException ex) {
             Logger.getLogger(CCSS_reporter.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        return dmg;
+    }
+    
+    
+    public DMemeGrid getStandardData() {
+        
+        DMemeGrid dmg = new DMemeGrid();
+        
+        dmg.setLabel("Standards: English Grade 2");
+        dmg.setColDescriptor("This the column descriptor here");
+        dmg.setRowDescriptor("This is the row descriptor here");
+        
+            dmg.setColDescriptor("Target Grade Level");
+            dmg.setRowDescriptor("Drift in Grade Level");   
+            
+            Integer total = 0;
+                 
+        String sql = "SELECT \n"
+                + "  BP.accountID, MSP.projectID, MSP.siteID, BP.name AS projectName\n"
+                + ", BSite.disname AS districtName, BSite.schname AS schoolName\n"
+                + ", MCSite.collectorID\n"
+                + ", BC.subjectArea, BC.gradeLevel\n"
+                + ", MSC.sampleID\n"
+                + ", RD.groupingID, RD.dataName, RD.dataValue\n"
+                + "FROM `bank_project` AS BP\n"
+                + "LEFT JOIN map_site_project AS MSP ON MSP.projectID = BP.id\n"
+                + "LEFT JOIN bank_site AS BSite ON BSite.id = MSP.siteID\n"
+                + "LEFT JOIN map_collector_site AS MCSite ON MCSite.siteID = MSP.siteID\n"
+                + "LEFT JOIN bank_collector AS BC ON BC.id = MCSite.collectorID\n"
+                + "LEFT JOIN map_sample_collector AS MSC ON MSC.collectorID = MCSite.collectorID\n"
+                + "LEFT JOIN review_data AS RD ON RD.sampleID = MSC.sampleID\n"
+                + "WHERE MSP.projectID = 23401520791814151\n"
+                + "AND MSP.active = 'y'\n"
+                + "AND BSite.active = 'y'\n"
+                + "AND MCSite.active = 'y'\n"
+                + "AND BC.active = 'y'\n"
+                + "AND MSC.active = 'y'\n"
+                + "AND RD.active = 'y'\n"
+                + "AND RD.dataName IN ('standard', 'counter')\n"
+                + "AND RD.dataValue <> \"\"\n"
+                + "AND BC.subjectArea = 'Mathematics'\n"
+                + "AND BC.gradeLevel = 5\n"
+                + "ORDER BY BP.name, BSite.disname, BSite.schname, \n"
+                + "BC.gradeLevel, BC.subjectArea, MSC.sampleID, \n"
+                + "RD.groupingID, RD.dataName, RD.dataValue  ";
+                
+
+        ResultSet rs = DM.Execute(sql);
+        
+            Map<String, String> item    = new HashMap<>();
+            Map<Integer, Integer> sample = new HashMap<>();
+               
+        try {
+            rs.beforeFirst();
+            
+            String currentCollectorID   = new String();
+            String currentSampleID      = new String();
+            String currentStandard      = new String();            
+            int currentGroupingID       = 0;  
+            int currentGradeLevel       = 0;
+            Boolean jump                = false;
+
+        
+            
+            while (rs.next()) {
+                if (currentGroupingID > 0) {
+
+                    if (rs.getInt("groupingID") != currentGroupingID) {
+                        //currentGroupingID = rs.getString("groupingID");                        
+                        jump = true;
+                    }
+                }
+                
+                if (jump == true) {
+
+                    String stnd     = item.get("standard");
+                    Integer hits    = new Integer(item.get("counter"));
+                    
+                    String[] sagl     = stnd.split("_")[1].split("\\.");
+                     
+                    
+                    total += hits;
+                    
+                    Integer agl = 0;
+                    if (sagl[0].equals("K")) {
+
+                    } else {
+                        agl = new Integer(sagl[0]);
+                    }
+                    
+                    Integer drift = agl -currentGradeLevel;
+                    
+                    if (sample.containsKey(drift)) {
+                        Integer c = sample.get(drift);
+                        sample.put(drift, c + hits);
+                    }
+                    else {
+                        sample.put(drift, hits);
+                    }
+                    /*
+                    System.out.printf("\n%16s \t%s \tTGL:%d \tAGL:%d\t%d", 
+                            stnd, 
+                            hits, 
+                            currentGradeLevel,
+                            agl, 
+                            agl -currentGradeLevel
+                    );
+                    */
+                    item.clear();
+                    jump = false;
+                }
+
+                item.put(rs.getString("dataName"), rs.getString("dataValue"));
+
+                currentCollectorID = rs.getString("collectorID");
+                currentSampleID = rs.getString("sampleID");
+                currentGroupingID = rs.getInt("groupingID");
+                
+                currentGradeLevel = rs.getInt("gradeLevel");
+            }
+            
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(CCSS_reporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        displayMap(sample);
+        
+        System.out.println("\nTotal = " + total);
         
         return dmg;
     }

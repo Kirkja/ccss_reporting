@@ -37,9 +37,12 @@ public class Main {
         // Pull Review_data for English grade 2
         //Test_B();
         
-        // Draw a rw CR Chart
-        Test_C();
+        // Draw a raw CR Chart
+        //Test_C();
         
+        
+        // Draw a raw standards
+        Test_D();
         
         System.out.println("\nDone.\n");
     }
@@ -81,7 +84,7 @@ public class Main {
     private static void Test_C() {
         CCSS_reporter reporter = new CCSS_reporter();
         
-        DMemeGrid dataGrid = reporter.getData();
+        DMemeGrid dataGrid = reporter.getRigorData();
         
         dataGrid.DumpGrid();
         
@@ -91,9 +94,23 @@ public class Main {
         rules.put("UseValueData", "true");
         rules.put("UseCountData", "false");    
 
-        Chart_X1(dataGrid, rules);
-                
+        Chart_X1(dataGrid, rules);                        
+    }
+
+        private static void Test_D() {
+        CCSS_reporter reporter = new CCSS_reporter();
         
+        DMemeGrid dataGrid = reporter.getStandardData();
+        
+        dataGrid.DumpGrid();
+        
+        // define some rules to use for the chart
+        Map<String,Object> rules = new HashMap<>();                
+        rules.put("OutFileName", "StandardsEnglish_2.svg");
+        rules.put("UseValueData", "true");
+        rules.put("UseCountData", "false");    
+
+        //Chart_X1(dataGrid, rules);                        
     }
 
 
