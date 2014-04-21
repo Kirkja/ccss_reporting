@@ -11,11 +11,16 @@ import com.learnerati.datameme.DataMeme;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 /**
  *
@@ -185,6 +190,7 @@ public class CCSS_reporter {
         }
     }
     
+
     
     public DMemeGrid getRigorData() {
         
@@ -235,7 +241,7 @@ public class CCSS_reporter {
             Boolean jump = false;
 
             Map<String, String> item    = new HashMap<>();
-            Map<String, Integer> sample = new HashMap<>();
+            Map<String, Integer> sample = new TreeMap<>();
            
             dmg.setLabel("Cognitive Rigor: English Grade 2");
             dmg.setColDescriptor("Bloom's Taxonomy (Revised)");
@@ -351,7 +357,7 @@ public class CCSS_reporter {
         ResultSet rs = DM.Execute(sql);
         
             Map<String, String> item    = new HashMap<>();
-            Map<Integer, Integer> sample = new HashMap<>();
+            Map<Integer, Integer> sample = new TreeMap<>(Collections.reverseOrder());
                
         try {
             rs.beforeFirst();
@@ -427,11 +433,36 @@ public class CCSS_reporter {
             Logger.getLogger(CCSS_reporter.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        
         displayMap(sample);
+        
+        dmg = convertToGrid(sample);
         
         System.out.println("\nTotal = " + total);
         
         return dmg;
+    }
+    
+    
+    private DMemeGrid convertToGrid(Map mp) {
+        
+        DMemeGrid grid = new DMemeGrid();
+        
+        int rowIdx = 0;
+        int colIdx = 0;
+        
+        Iterator it = mp.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry) it.next();
+            //System.out.print("\n" + pairs.getKey() + " = " + pairs.getValue());
+            grid.addRowLabel(rowIdx, pairs.getKey().toString());
+            grid.addItem(rowIdx, colIdx, new DataMeme(pairs.getValue()));
+            //it.remove(); // avoids a ConcurrentModificationException
+            
+            rowIdx++;
+        }
+        
+        return grid;
     }
 
 }

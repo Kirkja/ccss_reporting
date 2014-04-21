@@ -41,8 +41,11 @@ public class Main {
         //Test_C();
         
         
-        // Draw a raw standards
+        // Draw a raw standards chart
         Test_D();
+        
+        // Build out a project tree for reporting
+        //Test_E();
         
         System.out.println("\nDone.\n");
     }
@@ -97,7 +100,7 @@ public class Main {
         Chart_X1(dataGrid, rules);                        
     }
 
-        private static void Test_D() {
+    private static void Test_D() {
         CCSS_reporter reporter = new CCSS_reporter();
         
         DMemeGrid dataGrid = reporter.getStandardData();
@@ -113,6 +116,44 @@ public class Main {
         //Chart_X1(dataGrid, rules);                        
     }
 
+    
+    private static void Test_E() {
+        
+        
+
+        
+        Map<String, String> configOptions = new HashMap<>();
+        configOptions.put("base-image-directory",   "c:/GS_ROOT/images/");
+        configOptions.put("base-font-directory",    "c:/GS_ROOT/fonts/");
+        configOptions.put("base-doc-directory",     "c:/GS_ROOT/docs/");
+        configOptions.put("number-of-columns",      "1");        
+        
+        Map<String, String> coverOptions = new HashMap<>();
+        coverOptions.put("title-A", "title A here");
+        coverOptions.put("title-B", "title B here");
+        coverOptions.put("title-C", "SCR Analysis");        
+        coverOptions.put("title-sub", "title sub here");
+        coverOptions.put("published-by", "published by here");
+        
+        Map<String, String> abstractOptions = new HashMap<>();
+        abstractOptions.put("title", "abstract title here");
+        abstractOptions.put("body", "abstract body here");
+        
+               
+        XMLBase xmlBase = new XMLBase().Create("document");
+
+        DocBuilder dataReport = new DocBuilder(xmlBase);
+        dataReport.SetConfig(configOptions);
+        dataReport.SetCover(coverOptions);
+        dataReport.SetAbstract(abstractOptions);        
+                
+        CCSS_builder builder = new CCSS_builder();
+        
+        builder.getProjectTree(dataReport);
+        
+        xmlBase.WriteXML("ccss_report.xml");
+    }
+    
 
     private static void Chart_X1(DMemeGrid grid, Map<String, Object> rules) {
         

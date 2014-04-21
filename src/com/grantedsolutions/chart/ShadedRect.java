@@ -60,6 +60,7 @@ public class ShadedRect {
         _style  = new HashMap<>();
     }
 
+    
     /**
      * 
      * @param x An double defining the x coordinate of the ShadedRect.
@@ -160,8 +161,7 @@ public class ShadedRect {
             }
         } 
         
-        //String title ="Tooltip";
-        
+        // sets up up a tooltip for capable viewers
         if (!title.isEmpty()) {
             Element tooltip =  doc.createElement("title"); 
             tooltip.appendChild(doc.createTextNode(title)); 
