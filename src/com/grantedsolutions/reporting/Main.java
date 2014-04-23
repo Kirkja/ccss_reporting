@@ -104,6 +104,12 @@ public class Main {
         CCSS_reporter reporter = new CCSS_reporter();
         
         DMemeGrid dataGrid = reporter.getStandardData();
+        DMemeList colB = dataGrid.copyColumn(0);
+        dataGrid.addColumn(colB);
+        dataGrid.addColumn(colB);
+        //colB.addItem(new DataMeme("-3", 10));
+        colB.Reverse();
+        dataGrid.addColumn(colB);
         
         dataGrid.DumpGrid();
         
@@ -113,7 +119,9 @@ public class Main {
         rules.put("UseValueData", "true");
         rules.put("UseCountData", "false");    
 
-        //Chart_X1(dataGrid, rules);                        
+        Chart_X2(dataGrid, rules); 
+        
+        
     }
 
     
@@ -164,7 +172,21 @@ public class Main {
         graph.Build(grid);
 
         graph.ToFile("C:\\TROLLCREST_ROOT\\images", rules.get("OutFileName").toString());        
-    }    
+    }   
+    
+    private static void Chart_X2(DMemeGrid grid, Map<String, Object> rules) {
+        
+        Map<String, Object> params = new HashMap<>();
+        params.put("vertical-anchor", "top");
+        
+        SVGBase svgb = new SVGBase().Create();
+
+        GridToGLA graph = new GridToGLA(svgb);
+        graph.setRules(rules);        
+        graph.Build(grid);
+
+        graph.ToFile("C:\\TROLLCREST_ROOT\\images", rules.get("OutFileName").toString());        
+    }        
     
     
 }

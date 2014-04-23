@@ -266,7 +266,7 @@ public class GridToChart {
                             cellValue > 0d
                             ? String.format("%s", cellLabel) + "%"
                             : String.format("%s", cellLabel)
-                    )
+                        )
                     );
                     gridContainer2.appendChild(label);
                 }

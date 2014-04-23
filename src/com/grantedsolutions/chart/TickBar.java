@@ -5,8 +5,10 @@
  */
 package com.grantedsolutions.chart;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -24,6 +26,8 @@ public class TickBar {
     private static Map<String, Object> _params;
     private static Map<String, Object> _attrs;
     private static Map<String, Object> _style;
+    
+    private Double labelBackset = 10d;
 
     /**
      *
@@ -60,13 +64,44 @@ public class TickBar {
         
         return Create(x, y, len, "");
     }
+    
+    public Node Create(double x, 
+            double y, 
+            double len,
+            Map<String, Object> params) {
+        
+        SetParams(params);
+        
+        return Create(x, y, len, "");
+    }    
 
     public Node Create(double x, double y, double len, String title) {
         
-        double w = 10d;
+        double  w = 10d;
         
-        double cx = x - w / 2;
-        double cy = y - len / 2;
+        double  cx = x - w / 2;
+        double  cy = y - len / 2;
+        
+        int     segments = 5;
+        int     tickWidth = 10;
+        double  tickSpacing  = len/segments;
+        
+         List<String> labels =  new ArrayList<>();
+        
+        if (_params.containsKey("tickSpacing")) {
+            tickSpacing = new Double(_params.get("tickSpacing").toString());
+        }
+        
+        if (_params.containsKey("segments")) {
+            segments = new Integer(_params.get("segments").toString());
+        } 
+        
+        if (_params.containsKey("labels")) {
+            labels = (ArrayList)(_params.get("labels"));
+        }
+        
+        double  cLength = segments * tickSpacing;
+                
 
         if (_params != null) {
             if (_params.containsKey("vertical-anchor")) {
@@ -102,31 +137,65 @@ public class TickBar {
             }
         }
 
+        Element group = doc.createElement("g");
         
-        Element elem = doc.createElement("line");
-        elem.setAttribute("x1", String.format("%.4f", cx));
-        elem.setAttribute("y1", String.format("%.4f", cy));
-        
-        elem.setAttribute("x2", String.format("%.4f", cx));
-        elem.setAttribute("y2", String.format("%.4f", cy + len));
-
         if (_style != null) {
             for (Iterator iter = _style.keySet().iterator(); iter.hasNext();) {
                 String name = iter.next().toString();
                 Object value = _style.get(name);
 
-                elem.setAttributeNS(null, name, value.toString());
+                group.setAttributeNS(null, name, value.toString());
             }
+        }        
+        
+        Element elem = doc.createElement("line");
+        elem.setAttribute("x1", String.format("%.4f", cx));
+        elem.setAttribute("y1", String.format("%.4f", cy));        
+        elem.setAttribute("x2", String.format("%.4f", cx));
+        elem.setAttribute("y2", String.format("%.4f", cy + len));
+        
+        group.appendChild(elem);
+        
+
+        for (int tdx = 0; tdx <= segments; tdx++) {
+            Element tick = doc.createElement("line");
+            tick.setAttribute("x1", String.format("%.4f", cx));
+            tick.setAttribute("y1", String.format("%.4f", cy + (tdx*tickSpacing)));        
+            tick.setAttribute("x2", String.format("%.4f", cx + tickWidth));
+            tick.setAttribute("y2", String.format("%.4f", cy + (tdx*tickSpacing)));
+                        
+            group.appendChild(tick);
         }
+        
+        if (labels.size() > 0 && labels.size() <= segments) {
+            for (int tdx = 0; tdx < segments; tdx++){
+                
+                String cellLabel = labels.get(tdx);
+
+                Element label = doc.createElementNS(null, "text");
+                label.setAttributeNS(null, "text-anchor", "end");
+                label.setAttributeNS(null, "baseline-shift", "-33%");
+                label.setAttributeNS(null, "stroke", "none");
+                label.setAttributeNS(null, "fill", "black");
+                label.setAttributeNS(null, "font-size", "10pt");
+                label.setAttributeNS(null, "x", String.format("%.4f", cx - labelBackset));
+                label.setAttributeNS(null, "y", String.format("%.4f", cy + (tdx*tickSpacing)+tickSpacing/2d));
+                label.appendChild(doc.createTextNode(cellLabel));  
+
+                group.appendChild(label);
+            } 
+        }       
+        
+        
 
         // sets up up a tooltip for capable viewers
-        if (!title.isEmpty()) {
-            Element tooltip = doc.createElement("title");
-            tooltip.appendChild(doc.createTextNode(title));
-            elem.appendChild(tooltip);
-        }
+        //if (!title.isEmpty()) {
+        //    Element tooltip = doc.createElement("title");
+        //    tooltip.appendChild(doc.createTextNode(title));
+        //    elem.appendChild(tooltip);
+        //}
 
-        frag.appendChild(elem);
+        frag.appendChild(group);
 
         return frag;
     }

@@ -302,6 +302,25 @@ public class DMemeGrid {
     //------------------------------------------------------------------------
     // Column related methods 
     //
+    
+    
+    public Double getColTotal(int position) {
+        Double total = 0d;
+        
+        if (position < Cols()) {
+            DMemeList tmp = copyColumn(position);
+            if (tmp.size() > 0) {
+                for (DataMeme dm : tmp) {
+                    Double i = dm.asDouble();
+                    if (i != null) { total += i; }
+                }
+            }
+        }
+                
+        return total;
+    }
+    
+    
     /**
      *
      * @return The descriptive label for all the columns
