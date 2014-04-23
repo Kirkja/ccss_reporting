@@ -29,7 +29,7 @@ public class GridToGLA {
     private Double barHeight = 30d;
     private int gridInset = 0;
 
-    private final Double horzOffset = 38d;
+    private final Double horzOffset = 75d;
     private final Double vertOffset = 30d;
 
     private boolean useRowDescriptor = true;
@@ -90,17 +90,24 @@ public class GridToGLA {
         Double tickSpacing  = 50d;
         int rows            = grid.Rows();
         
+        Double cellMaxWidth = 100d;        
+        Double X1           = horzOffset;
+        Double Y1           = vertOffset;
+        Double len          = (double)(rows * tickSpacing); 
+               
         List<String> rowLabels = prefixSign(grid.getRowLabels());
-        
-        Double len      = (double)(rows * tickSpacing); 
         
         params.put("tickSpacing", tickSpacing);
         params.put("segments", rows);
         params.put("labels", rowLabels);
+        params.put("horizontal-anchor", "left");
+        
+        
+               
         
         base.CheckPoint(0d, 0d);
         
-        // create the grid container -----------------------------------------
+        // create the various containers --------------------------------------
         Element gridContainer = doc.createElementNS(null, "g");
         gridContainer.setAttributeNS(null, "id", "grid_lines");
         gridContainer.setAttributeNS(null, "stroke", "black");
@@ -110,21 +117,96 @@ public class GridToGLA {
         Element barContainer = doc.createElementNS(null, "g");
         barContainer.setAttributeNS(null, "id", "grid_bars");
         barContainer.setAttributeNS(null, "stroke", "black");
-        barContainer.setAttributeNS(null, "stroke-width", "0.25");
-        
+        barContainer.setAttributeNS(null, "stroke-width", "0.25");        
         barContainer.setAttributeNS(null, "opacity", "1");
         
-        styles.put("fill", "orange");
+        Element labelContainer = doc.createElementNS(null, "g");
+        labelContainer.setAttributeNS(null, "id", "grid_labels");
+        labelContainer.setAttributeNS(null, "stroke", "black");
+        labelContainer.setAttributeNS(null, "stroke-width", "0.25");        
+        labelContainer.setAttributeNS(null, "opacity", "1");
+                
+        Element baseContainer = doc.createElementNS(null, "g");
+        baseContainer.setAttributeNS(null, "id", "grid_base");
+        baseContainer.setAttributeNS(null, "stroke", "black");
+        baseContainer.setAttributeNS(null, "stroke-width", "0.25");        
+        baseContainer.setAttributeNS(null, "opacity", "0.25");
+                  
+           
+        Integer atGLA = rowLabels.indexOf("0");
         
-        Double cellMaxWidth = 100d;        
-        Double X1 = horzOffset;
-        Double Y1 = vertOffset;
+        styles.put("fill", "grey");
+        baseContainer.appendChild(
+            new ShadedRect(doc).Create(
+                    horzOffset -35,
+                    vertOffset + (atGLA*tickSpacing),
+                    grid.Cols() * cellMaxWidth + 15,
+                    cellHeight,
+                    params,
+                    styles
+            )
+        ); 
+        base.CheckPoint(horzOffset -35 + grid.Cols() * cellMaxWidth + 15, 
+                vertOffset + (atGLA*tickSpacing) + cellHeight);
+        
+        
+        
+        // place the row descriptor -------------------------------------------
+        if (useRowDescriptor) {
+            String str = grid.getRowDescriptor();
 
-        params.put("horizontal-anchor", "left");
-       
-        for (int colIdx = 0; colIdx < grid.Cols(); colIdx++) {
+            Double x = horzOffset - 45;
+            Double y = vertOffset + (rows * cellHeight) / 2 ;
+
+            Element label = doc.createElementNS(null, "text");
+            label.setAttributeNS(null, "text-anchor", "middle");
+            label.setAttributeNS(null, "baseline-shift", "-33%");
+            label.setAttributeNS(null, "transform", String.format("rotate(-90, %d, %d)", x.intValue(), y.intValue()));
+            label.setAttributeNS(null, "stroke", "none");
+            label.setAttributeNS(null, "fill", "black");
+            label.setAttributeNS(null, "font-size", "12pt");
+            label.setAttributeNS(null, "x", x.toString());
+            label.setAttributeNS(null, "y", y.toString());
+            label.appendChild(doc.createTextNode(String.format("%s", str)));
+            labelContainer.appendChild(label);
+        }        
+        
+        
+        // place the coldescriptor --------------------------------------------
+        if (useColDescriptor) {
             
+            Double x = (horzOffset + (grid.Cols() * cellMaxWidth)) / 2d;
+            Double y = vertOffset + (rows * cellHeight) + cellHeight;
+
+            String str = grid.getColDescriptor();
+
+            Element label = doc.createElementNS(null, "text");
+            label.setAttributeNS(null, "text-anchor", "middle");
+            label.setAttributeNS(null, "stroke", "none");
+            label.setAttributeNS(null, "fill", "black");
+            label.setAttributeNS(null, "font-size", "12pt");
+            label.setAttributeNS(null, "x", x.toString());
+            label.setAttributeNS(null, "y", y.toString());
+            label.appendChild(doc.createTextNode(String.format("%s", str)));
+            labelContainer.appendChild(label);
+            
+            base.CheckPoint(x, y +20);
+        }        
+        
+        
+        
+        styles.put("fill", "orange");
+        for (int colIdx = 0; colIdx < grid.Cols(); colIdx++) {
+                        
             params.put("vertical-anchor", "top");
+            
+            if (colIdx == 0) {
+               params.put("useSegmentLabels", true); 
+            }
+            else {
+                params.put("useSegmentLabels", false); 
+            }
+            
             X1 = horzOffset + (colIdx*cellMaxWidth) -5;
             
             gridContainer.appendChild(
@@ -132,7 +214,8 @@ public class GridToGLA {
                             X1,
                             vertOffset,
                             len,
-                            params
+                            params,
+                            grid.getColLabel(colIdx)
                     )
             );            
             
@@ -175,7 +258,7 @@ public class GridToGLA {
                     
                     String cellLabel = String.format("%.0f", cellWidth);
                     Element label = doc.createElementNS(null, "text");
-                    label.setAttributeNS(null, "text-anchor", "left");
+                    label.setAttributeNS(null, "text-anchor", "start");
                     label.setAttributeNS(null, "baseline-shift", "-33%");
                     label.setAttributeNS(null, "stroke", "none");
                     label.setAttributeNS(null, "fill", "black");
@@ -194,8 +277,11 @@ public class GridToGLA {
             }
         }
         
+        
+        root.appendChild(baseContainer);
         root.appendChild(gridContainer);
-        root.appendChild(barContainer);
+        root.appendChild(barContainer);        
+        root.appendChild(labelContainer);
     }
 
 //=============================================================================

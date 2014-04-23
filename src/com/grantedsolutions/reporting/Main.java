@@ -101,15 +101,32 @@ public class Main {
     }
 
     private static void Test_D() {
+        
         CCSS_reporter reporter = new CCSS_reporter();
         
         DMemeGrid dataGrid = reporter.getStandardData();
+        dataGrid.addColLabel("SCI");
+        
+        dataGrid.setRowDescriptor("Grade Level Drift");
+        dataGrid.setColDescriptor("Content Areas");
+        
         DMemeList colB = dataGrid.copyColumn(0);
+        
+        
+        //colB.setLabel("ELA");        
         dataGrid.addColumn(colB);
+        dataGrid.addColLabel("ELA");
+        
+        //colB.setLabel("Math");
         dataGrid.addColumn(colB);
-        //colB.addItem(new DataMeme("-3", 10));
+        dataGrid.addColLabel("MTH");
+        
+        //colB.setLabel("SCI");
         colB.Reverse();
+        
+        //colB.setLabel("SOC");
         dataGrid.addColumn(colB);
+        dataGrid.addColLabel("SOC");
         
         dataGrid.DumpGrid();
         
@@ -126,10 +143,7 @@ public class Main {
 
     
     private static void Test_E() {
-        
-        
-
-        
+                
         Map<String, String> configOptions = new HashMap<>();
         configOptions.put("base-image-directory",   "c:/GS_ROOT/images/");
         configOptions.put("base-font-directory",    "c:/GS_ROOT/fonts/");
