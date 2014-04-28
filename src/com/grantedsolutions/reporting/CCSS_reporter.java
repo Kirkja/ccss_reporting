@@ -195,7 +195,6 @@ public class CCSS_reporter {
     public DMemeGrid getRigorData() {
         
         DMemeGrid dmg = new DMemeGrid();
-
                   
         String sql = "SELECT \n"
                 + "  BP.accountID, MSP.projectID, MSP.siteID, BP.name AS projectName\n"
@@ -316,45 +315,14 @@ public class CCSS_reporter {
         DMemeGrid dmg = new DMemeGrid();
         
         dmg.setLabel("Standards: English Grade 2");
-        dmg.setColDescriptor("This the column descriptor here");
-        dmg.setRowDescriptor("This is the row descriptor here");
+        //dmg.setColDescriptor("This the column descriptor here");
+        //dmg.setRowDescriptor("This is the row descriptor here");
         
-            dmg.setColDescriptor("Target Grade Level");
-            dmg.setRowDescriptor("Drift in Grade Level");   
+        dmg.setColDescriptor("Collected Content Areas");
+        dmg.setRowDescriptor("Drift in Grade Level");   
             
-            Integer total = 0;
-        /*         
-        String sql = "SELECT \n"
-                + "  BP.accountID, MSP.projectID, MSP.siteID, BP.name AS projectName\n"
-                + ", BSite.disname AS districtName, BSite.schname AS schoolName\n"
-                + ", MCSite.collectorID\n"
-                + ", BC.subjectArea, BC.gradeLevel\n"
-                + ", MSC.sampleID\n"
-                + ", RD.groupingID, RD.dataName, RD.dataValue\n"
-                + "FROM `bank_project` AS BP\n"
-                + "LEFT JOIN map_site_project AS MSP ON MSP.projectID = BP.id\n"
-                + "LEFT JOIN bank_site AS BSite ON BSite.id = MSP.siteID\n"
-                + "LEFT JOIN map_collector_site AS MCSite ON MCSite.siteID = MSP.siteID\n"
-                + "LEFT JOIN bank_collector AS BC ON BC.id = MCSite.collectorID\n"
-                + "LEFT JOIN map_sample_collector AS MSC ON MSC.collectorID = MCSite.collectorID\n"
-                + "LEFT JOIN review_data AS RD ON RD.sampleID = MSC.sampleID\n"
-                + "WHERE MSP.projectID = 23401520791814151\n"
-                + "AND MSP.active = 'y'\n"
-                + "AND BSite.active = 'y'\n"
-                + "AND MCSite.active = 'y'\n"
-                + "AND BC.active = 'y'\n"
-                + "AND MSC.active = 'y'\n"
-                + "AND RD.active = 'y'\n"
-                + "AND RD.dataName IN ('standard', 'counter')\n"
-                + "AND RD.dataValue <> ''\n"
-                + "AND BC.subjectArea = 'Mathematics'\n"
-                + "AND BC.gradeLevel = 5\n"
-                + "ORDER BY BP.name, BSite.disname, BSite.schname, \n"
-                + "BC.gradeLevel, BC.subjectArea, MSC.sampleID, \n"
-                + "RD.groupingID, RD.dataName, RD.dataValue  ";
-        */ 
-            
-            
+        Integer total = 0;
+                    
         String sql = "SELECT \n" +
                     "  MSP.projectID\n" +
                     ", BP.name AS projectName\n" +
@@ -396,13 +364,16 @@ public class CCSS_reporter {
         
             Map<String, String> item    = new HashMap<>();
             Map<Integer, Integer> sample = new TreeMap<>(Collections.reverseOrder());
-               
+                         
+            Map<String, Map<Integer, Integer>> sampleB = new TreeMap<>();
+                                                 
         try {
             rs.beforeFirst();
             
             String currentCollectorID   = new String();
             String currentSampleID      = new String();
-            String currentStandard      = new String();            
+            String currentStandard      = new String(); 
+            String currentSubjectArea   = new String();
             int currentGroupingID       = 0;  
             int currentGradeLevel       = 0;
             Boolean jump                = false;
@@ -435,6 +406,7 @@ public class CCSS_reporter {
                     
                     Integer drift = agl -currentGradeLevel;
                     
+                    /*
                     if (sample.containsKey(drift)) {
                         Integer c = sample.get(drift);
                         sample.put(drift, c + hits);
@@ -442,15 +414,22 @@ public class CCSS_reporter {
                     else {
                         sample.put(drift, hits);
                     }
-                    /*
-                    System.out.printf("\n%16s \t%s \tTGL:%d \tAGL:%d\t%d", 
-                            stnd, 
-                            hits, 
-                            currentGradeLevel,
-                            agl, 
-                            agl -currentGradeLevel
-                    );
                     */
+                    
+                    if(sampleB.containsKey(currentSubjectArea)) {
+                        if (sampleB.get(currentSubjectArea).containsKey(drift)) {
+                            Integer c = sampleB.get(currentSubjectArea).get(drift);
+                            sampleB.get(currentSubjectArea).put(drift, c + hits);
+                        }
+                        else {
+                            sampleB.get(currentSubjectArea).put(drift, hits);
+                        }
+                    } else {
+                        Map<Integer, Integer> dmap = new TreeMap<>(Collections.reverseOrder());
+                        dmap.put(drift, hits);
+                        sampleB.put(currentSubjectArea, dmap);
+                    }
+
                     item.clear();
                     jump = false;
                 }
@@ -461,6 +440,7 @@ public class CCSS_reporter {
                 currentSampleID     = rs.getString("sampleID");
                 currentGroupingID   = rs.getInt("groupingID");               
                 currentGradeLevel   = rs.getInt("gradeLevel");
+                currentSubjectArea  = rs.getString("subjectArea");
             }
             
             
@@ -469,13 +449,16 @@ public class CCSS_reporter {
         }
         
         
-        //displayMap(sample);
+        //displayMap(sampleB);
         
-        dmg = convertToGrid(sample);
+        //dmg = convertToGrid(sample);
+        
+        DMemeGrid g2 = convertToGridB(sampleB);
+        //g2.DumpGrid();
         
         System.out.println("\nTotal = " + total);
         
-        return dmg;
+        return g2;
     }
     
     
@@ -489,15 +472,61 @@ public class CCSS_reporter {
         Iterator it = mp.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pairs = (Map.Entry) it.next();
-            //System.out.print("\n" + pairs.getKey() + " = " + pairs.getValue());
+            
             grid.addRowLabel(rowIdx, pairs.getKey().toString());
             grid.addItem(rowIdx, colIdx, new DataMeme(pairs.getValue()));
-            //it.remove(); // avoids a ConcurrentModificationException
-            
+
             rowIdx++;
         }
         
         return grid;
     }
 
+    
+    private DMemeGrid convertToGridB(Map mp) {
+        
+        DMemeGrid grid = new DMemeGrid();
+        
+        int rowIdx = 0;
+        int colIdx = 0;
+        
+        Iterator it = mp.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry) it.next();
+            
+            Map<Integer, Integer> tmp = (TreeMap<Integer,Integer>)pairs.getValue();
+
+            grid.addColLabel(pairs.getKey().toString());
+            
+            Iterator it2 = tmp.entrySet().iterator();
+            rowIdx = 0;
+            while (it2.hasNext()) {
+               Map.Entry item = (Map.Entry) it2.next();
+               
+               Integer i = new Integer(item.getKey().toString());
+               String label = item.getKey().toString();
+               
+               if (i > 0) {
+                   label = String.format("+%d", i);
+               }
+               
+               if (!grid.getRowLabels().contains(label)) {
+                   grid.addRowLabel(label);
+               }
+                
+               grid.addItem(rowIdx, colIdx, new DataMeme(item.getValue()));
+               
+               rowIdx++; 
+            }
+           colIdx++; 
+        }
+        
+        
+        
+        return grid;
+    }
+    
+    
+    
+    
 }

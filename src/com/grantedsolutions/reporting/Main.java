@@ -37,11 +37,11 @@ public class Main {
         // Pull Review_data for English grade 2
         //Test_B();
         
-        // Draw a raw CR Chart
+        // Draw a CR Chart
         //Test_C();
         
         
-        // Draw a raw standards chart
+        // Draw a GLA Chart - at a grade level for all subject areas
         Test_D();
         
         // Build out a project tree for reporting
@@ -93,7 +93,7 @@ public class Main {
         
         // define some rules to use for the chart
         Map<String,Object> rules = new HashMap<>();                
-        rules.put("OutFileName", "CognitiveRigorEnglish_2.svg");
+        rules.put("OutFileName", "CR_2.svg");
         rules.put("UseValueData", "true");
         rules.put("UseCountData", "false");    
 
@@ -110,39 +110,23 @@ public class Main {
         CCSS_reporter reporter = new CCSS_reporter();
         
         DMemeGrid dataGrid = reporter.getStandardData();
-        dataGrid.addColLabel("SCI");
         
         dataGrid.setRowDescriptor("Grade Level Drift");
-        dataGrid.setColDescriptor("Content Areas");
-        
-        DMemeList colB = dataGrid.copyColumn(0);
-        
-        
-        //colB.setLabel("ELA");        
-        dataGrid.addColumn(colB);
-        dataGrid.addColLabel("ELA");
-        
-        //colB.setLabel("Math");
-        dataGrid.addColumn(colB);
-        dataGrid.addColLabel("MTH");
-        
-        //colB.setLabel("SCI");
-        colB.Reverse();
-        
-        //colB.setLabel("SOC");
-        dataGrid.addColumn(colB);
-        dataGrid.addColLabel("SOC");
+        dataGrid.setColDescriptor("Collected Subject Areas");
         
         dataGrid.DumpGrid();
         
         // define some rules to use for the chart
         Map<String,Object> rules = new HashMap<>();                
-        rules.put("OutFileName", "Mathematics_5.svg");
+        rules.put("OutFileName", "GLA_5.svg");
         rules.put("UseValueData", "true");
         rules.put("UseCountData", "false");    
 
         Chart_X2(dataGrid, rules); 
         
+        
+        rules.put("OutFileName", "table_a.xml");
+        TableMaker(dataGrid, rules);
         
     }
 
@@ -153,7 +137,7 @@ public class Main {
         configOptions.put("base-image-directory",   "c:/GS_ROOT/images/");
         configOptions.put("base-font-directory",    "c:/GS_ROOT/fonts/");
         configOptions.put("base-doc-directory",     "c:/GS_ROOT/docs/");
-        configOptions.put("number-of-columns",      "1");        
+        configOptions.put("number-of-columns",      "2");        
         
         Map<String, String> coverOptions = new HashMap<>();
         coverOptions.put("title-A", "title A here");
@@ -208,4 +192,18 @@ public class Main {
     }        
     
     
+    
+    
+    private static void TableMaker(DMemeGrid grid, Map<String, Object> rules) {
+        
+        XMLBase xmlBase = new XMLBase().Create("table");
+        //DocBuilder dataTable = new DocBuilder(xmlBase);
+        
+        GridToTable table = new GridToTable(xmlBase);
+        table.Load(grid);
+        table.Build();
+        
+        //xmlBase.WriteXML("tabkle_a.xml");
+        System.out.println(xmlBase.AsString());
+    }
 }

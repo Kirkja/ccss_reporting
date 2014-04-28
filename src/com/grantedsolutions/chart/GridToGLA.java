@@ -95,7 +95,8 @@ public class GridToGLA {
         Double Y1           = vertOffset;
         Double len          = (double)(rows * tickSpacing); 
                
-        List<String> rowLabels = prefixSign(grid.getRowLabels());
+        //List<String> rowLabels = prefixSign(grid.getRowLabels());
+        List<String> rowLabels = grid.getRowLabels();
         
         params.put("tickSpacing", tickSpacing);
         params.put("segments", rows);
@@ -176,7 +177,7 @@ public class GridToGLA {
         if (useColDescriptor) {
             
             Double x = (horzOffset + (grid.Cols() * cellMaxWidth)) / 2d;
-            Double y = vertOffset + (rows * cellHeight) + cellHeight;
+            Double y = vertOffset + (rows * cellHeight) + cellHeight*0.8d;
 
             String str = grid.getColDescriptor();
 
@@ -190,7 +191,7 @@ public class GridToGLA {
             label.appendChild(doc.createTextNode(String.format("%s", str)));
             labelContainer.appendChild(label);
             
-            base.CheckPoint(x, y +20);
+            base.CheckPoint(x, y +15);
         }        
         
         

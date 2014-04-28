@@ -93,7 +93,12 @@ public class XMLBase {
         
         String fullPath = path + location + "/" + fileName;
 
-
+        System.out.println("\nWriting: " + fullPath);
+        
+        if (doc == null) {
+            System.out.println("DOC is NULL");
+        }
+        
         /*
          * try { boolean exists = (new File(path)).exists();
          *
@@ -116,10 +121,11 @@ public class XMLBase {
             serializer.setOutputProperty(OutputKeys.INDENT, "yes");
             serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
-            serializer.transform(new DOMSource(doc), new StreamResult(new java.io.FileWriter(fullPath)));
+            serializer.transform(new DOMSource(doc)
+                    , new StreamResult(new java.io.FileWriter(fullPath))
+            );
 
         } catch (TransformerException e) {
-
             throw new RuntimeException(e);
         } catch (IOException ex) {
             Logger.getLogger(XMLBase.class.getName()).log(Level.SEVERE, null, ex);
