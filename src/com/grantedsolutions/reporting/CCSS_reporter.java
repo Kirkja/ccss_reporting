@@ -190,7 +190,35 @@ public class CCSS_reporter {
         }
     }
     
+    public DMemeGrid pullRigorData(
+            String projectID, 
+            String siteID, 
+            String subjectArea, 
+            String gradeLevel) {
+        
+        DMemeGrid dmg = new DMemeGrid();
+        
+        dmg.setLabel(String.format("Cognitive Rigor: %s Grade %s", subjectArea, gradeLevel));
+        dmg.setColDescriptor("Bloom's Taxonomy (Revised)");
+        dmg.setRowDescriptor("Depth of Knowledge");
 
+        dmg.addRowLabel("4");
+        dmg.addRowLabel("3");
+        dmg.addRowLabel("2");
+        dmg.addRowLabel("1");
+        dmg.addColLabel("1");
+        dmg.addColLabel("2");
+        dmg.addColLabel("3");
+        dmg.addColLabel("4");
+        dmg.addColLabel("5");
+        dmg.addColLabel("6");        
+        
+        
+        return dmg;
+    }
+    
+    
+    
     
     public DMemeGrid getRigorData() {
         

@@ -42,10 +42,10 @@ public class Main {
         
         
         // Draw a GLA Chart - at a grade level for all subject areas
-        Test_D();
+        //Test_D();
         
         // Build out a project tree for reporting
-        //Test_E();
+        Test_E();
         
         System.out.println("\nDone.\n");
     }
@@ -149,20 +149,20 @@ public class Main {
         Map<String, String> abstractOptions = new HashMap<>();
         abstractOptions.put("title", "abstract title here");
         abstractOptions.put("body", "abstract body here");
-        
-               
+                       
         XMLBase xmlBase = new XMLBase().Create("document");
 
-        DocBuilder dataReport = new DocBuilder(xmlBase);
-        dataReport.SetConfig(configOptions);
-        dataReport.SetCover(coverOptions);
-        dataReport.SetAbstract(abstractOptions);        
+        DocBuilder docBase = new DocBuilder(xmlBase);
+        docBase.SetConfig(configOptions);
+        docBase.SetCover(coverOptions);
+        docBase.SetAbstract(abstractOptions);        
                 
         CCSS_builder builder = new CCSS_builder();
+        builder.setDocBase(docBase);
+        builder.getProject();
+        builder.ToFile("C:\\GS_ROOT\\xml", "Project_001.xml");
         
-        builder.getProjectTree(dataReport);
-        
-        xmlBase.WriteXML("ccss_report.xml");
+        //xmlBase.WriteXML("ccss_report.xml");
     }
     
 
@@ -177,6 +177,8 @@ public class Main {
         graph.ToFile("C:\\TROLLCREST_ROOT\\images", rules.get("OutFileName").toString());        
     }   
     
+    
+    
     private static void Chart_X2(DMemeGrid grid, Map<String, Object> rules) {
         
         Map<String, Object> params = new HashMap<>();
@@ -188,7 +190,7 @@ public class Main {
         graph.setRules(rules);        
         graph.Build(grid);
 
-        graph.ToFile("C:\\TROLLCREST_ROOT\\images", rules.get("OutFileName").toString());        
+        graph.ToFile("C:\\GS_ROOT\\charts", rules.get("OutFileName").toString());        
     }        
     
     
@@ -197,13 +199,11 @@ public class Main {
     private static void TableMaker(DMemeGrid grid, Map<String, Object> rules) {
         
         XMLBase xmlBase = new XMLBase().Create("table");
-        //DocBuilder dataTable = new DocBuilder(xmlBase);
-        
+
         GridToTable table = new GridToTable(xmlBase);
         table.Load(grid);
         table.Build();
-        
-        //xmlBase.WriteXML("tabkle_a.xml");
-        System.out.println(xmlBase.AsString());
+        table.ToFile("C:\\GS_ROOT\\tables", "table_zz.xml");
+
     }
 }

@@ -140,4 +140,11 @@ public class DocBuilder {
 
         return base.ImportFragmentString(text.toString());
     }
+    
+    
+    
+    
+    public void ToFile(String path, String name) {
+        base.AsFile(path, name);
+    }
 }

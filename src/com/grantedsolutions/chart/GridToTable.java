@@ -267,5 +267,13 @@ public class GridToTable {
         return items;
     }
     
+    //=======================================================================
+    
+    public void ToFile(String path, String name) {
+        //base.WriteToFile(path, name);
+        base.AsFile(path, name);
+    }
+
+    
     
 }

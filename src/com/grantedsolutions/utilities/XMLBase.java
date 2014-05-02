@@ -4,6 +4,9 @@
  */
 package com.grantedsolutions.utilities;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -40,8 +43,7 @@ public class XMLBase {
      */
     public Element root;
     
-   
-    
+       
     private DocumentBuilderFactory factory;
     
 
@@ -136,7 +138,9 @@ public class XMLBase {
     public String AsString()
     {
         try {
-            OutputFormat format    = new OutputFormat (doc); 
+            OutputFormat format    = new OutputFormat (doc);
+            format.setIndent(2);
+            format.setIndenting(true);
             StringWriter stringOut = new StringWriter ();    
             XMLSerializer serial   = new XMLSerializer (stringOut, format);
             
@@ -150,6 +154,35 @@ public class XMLBase {
         
         return new String();
     }
+    
+    
+    public void AsFile(String path, String name)
+    {
+        String fullPath  = String.format("%s%s%s", path, File.separatorChar, name);
+        
+        System.out.println("Writing: " + fullPath);
+        
+        try {
+            OutputFormat format    = new OutputFormat (doc);
+            format.setIndent(2);
+            format.setIndenting(true);
+            StringWriter stringOut = new StringWriter ();    
+            XMLSerializer serial   = new XMLSerializer (stringOut, format);
+            
+            serial.serialize(doc);   
+            
+            FileWriter outFile = new FileWriter(fullPath);  
+            BufferedWriter bWriter = new BufferedWriter(outFile);
+            bWriter.write(stringOut.toString());  
+             
+            bWriter.flush();
+            bWriter.close();
+        } catch (IOException ex) {
+            Logger.getLogger(XMLBase.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
     
     public String Stripped()
     {
