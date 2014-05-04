@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 
 /**
@@ -255,26 +256,28 @@ public class CCSS_builder {
                 + "GROUP BY BS.disname, BS.schname, BC.gradeLevel, BC.subjectArea "
                 + "ORDER BY BS.disname, BS.schname, BC.gradeLevel, BC.subjectArea ";
 
-        ResultSet rs = DM.Execute(sql);
+        ResultSet rs            = DM.Execute(sql);
 
-        String curSiteID = "";
-        String curGradeLevel = "";
-        String curSubjectArea = "";
+        String curSiteID        = "";
+        String curGradeLevel    = "";
+        String curSubjectArea   = "";
+        String curProjectID     = "";
 
-        boolean start = false;
-
-        //Map<String, String> tree = new TreeMap<>();
-        Element curSchool = null;
-        Element curGrade = null;
-        Element curSubject = null;
+        boolean start           = false;
         
-        Element holder = base.CreateSection("School Results");
+        Element curSchool       = null;
+        Element curGrade        = null;
+        Element curSubject      = null;
+        
+        Element holder          = base.CreateSection("School Results");
 
         try {
             rs.beforeFirst();
 
             while (rs.next()) {
-                                
+                 
+                curProjectID = rs.getString("projectID");
+                
                 // Initial NULL cases
                 if (curSchool == null) {
                     curSiteID = rs.getString("siteID");
@@ -282,17 +285,47 @@ public class CCSS_builder {
                     curSchool.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/CCSS_filler.txt"));
                     System.out.println("\nSchool: " + rs.getString("schname"));                        
                 }
+                
                 if (curGrade == null) {
                     curGradeLevel = rs.getString("gradeLevel");
                     curGrade = base.CreateSection("Grade " + rs.getString("gradeLevel"));
-                    curGrade.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/CCSS_filler.txt"));
-                    System.out.println("\tGrade: " + rs.getString("gradeLevel"));                        
-                }                    
+                    curGrade.setAttribute("bump", "true");
+                    curGrade.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/grade_filler.txt"));
+                    
+                    System.out.println("\tGrade: " + rs.getString("gradeLevel")); 
+                    
+                    curGrade.appendChild(
+                            base.Base().ImportFragmentString(
+                                createChart(
+                                     "Grade Level Analysis"   
+                                    , curProjectID
+                                    , curSiteID
+                                    , curGradeLevel
+                                    , "gla"
+                                )
+                            )
+                        );   
+                        
+                    curGrade.appendChild(
+                            base.Base().ImportFragmentString(
+                                createTable(
+                                    curProjectID
+                                    , curSiteID
+                                    , curGradeLevel
+                                    , curSubjectArea
+                                )
+                            )
+                        );                         
+                }  
+                
                 if (curSubject == null) {
                     curSubjectArea = rs.getString("subjectArea");
                     curSubject = base.CreateSection(rs.getString("subjectArea"));
-                    curSubject.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/CCSS_filler.txt"));
-                    System.out.println("\tSubject: " + rs.getString("subjectArea"));                        
+                    curSubject.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/subject_filler.txt"));
+                    System.out.println("\tSubject: " + rs.getString("subjectArea")); 
+                    
+                    
+                    
                 }                 
                 
                 // Running checks
@@ -300,21 +333,70 @@ public class CCSS_builder {
 
                     curGrade.appendChild(curSubject);                    
                     curSubject = base.CreateSection(rs.getString("subjectArea"));
-                    curSubject.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/CCSS_filler.txt"));
+                    curSubject.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/subject_filler.txt"));
 
-                    System.out.println("\t\tSubject area: " + rs.getString("subjectArea"));                    
+                    System.out.println("\t\tSubject area: " + rs.getString("subjectArea")); 
+                    System.out.println("\t\t[Generate CR for " + rs.getString("subjectArea")  +"]");
+                    
+                    curGrade.appendChild(
+                        base.Base().ImportFragmentString(
+                            createChart(
+                                  String.format("Cognitive Rigor: %s (Grade %s)",curSubjectArea , curGradeLevel) 
+                                , curProjectID
+                                , curSiteID
+                                , curGradeLevel
+                                , curSubjectArea)
+                        )
+                    ); 
+                    
+                    curGrade.appendChild(
+                        base.Base().ImportFragmentString(
+                            createTable(
+                                curProjectID
+                                , curSiteID
+                                , curGradeLevel
+                                , curSubjectArea
+                            )
+                        )
+                    );                    
                 }
                  
+                
                 if (!curGradeLevel.equals(rs.getString("gradeLevel"))) {
 
                     curGrade.appendChild(curSubject);
-                    curSchool.appendChild(curGrade);
-                    
+                    curSchool.appendChild(curGrade);                    
                     curGrade = base.CreateSection("Grade " + rs.getString("gradeLevel"));
-                    curGrade.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/CCSS_filler.txt"));
+                    curGrade.setAttribute("bump", "true");
+                    curGrade.appendChild(base.PullExternal(props.getProperty("file.inbase") + "insert_files/grade_filler.txt"));
 
                     System.out.println("\tGrade level: " + rs.getString("gradeLevel"));
+                    
+                                       
+                    curGrade.appendChild(
+                        base.Base().ImportFragmentString(
+                            createChart(
+                                  "Grade Level Anlaysis"
+                                , curProjectID
+                                , curSiteID
+                                , curGradeLevel
+                                , "gla")
+                        )
+                    ); 
+                    
+                    curGrade.appendChild(
+                        base.Base().ImportFragmentString(
+                            createTable(
+                                curProjectID
+                                , curSiteID
+                                , curGradeLevel
+                                , curSubjectArea
+                            )
+                        )
+                    );                     
                 }               
+                
+                                
                 
                 if (!curSiteID.equals(rs.getString("siteID"))) {
 
@@ -329,10 +411,13 @@ public class CCSS_builder {
                     System.out.println("\nSchool: " + rs.getString("schname"));                    
                 }
 
+                
                 curSiteID = rs.getString("siteID");
                 curGradeLevel = rs.getString("gradeLevel");
                 curSubjectArea = rs.getString("subjectArea");
             }
+            
+            
             
             curGrade.appendChild(curSubject);
             curSchool.appendChild(curGrade);
@@ -348,11 +433,98 @@ public class CCSS_builder {
     }
     
     
+    
+    
     public void ToFile(String path, String name) {
          base.ToFile(path, name);
+    }
+    
+
+    
+    
+    
+    private String createChart(
+              String title
+            , String projectID
+            , String siteID
+            , String gradeLevel
+            , String subjectArea
+    ) {
+        StringBuilder str = new StringBuilder();
+        
+        
+        String chartName = "";
+        
+        switch(subjectArea.toLowerCase()) {
+            case "mathematics":
+                chartName = "chart_holder_math.svg";
+                break;
+                
+            case "math":
+                chartName = "chart_holder_math.svg";
+                break;
+                
+            case "english":
+                chartName = "chart_holder_ela.svg";
+                break;
+                
+            case "science":
+                chartName = "chart_holder_sci.svg";
+                break;
+                
+            case "history":
+                chartName = "chart_holder_soc.svg";
+                break;
+                
+            case "gla":
+                chartName = "chart_holder_gla.svg";
+                break;
+                
+            case "dok-drift":
+                chartName = "chart_holder_dok-drift.svg";
+                break; 
+                
+            case "blm-drift":
+                chartName = "chart_holder_blm-drift.svg";
+                break; 
+                
+            default:
+                 chartName = "chart_holder.svg";
+                break;
+        }
+        
+        
+        
+        str.append("<chart index='true'>");
+        str.append("<title>");
+        str.append(title);
+        str.append("</title>");
+        str.append("<width>100%</width>");
+        str.append("<source>");
+        str.append(chartName); 
+        str.append("</source>");
+        str.append("<caption>");
+        str.append("Some caption here");
+        str.append("</caption>");
+        str.append("</chart>");
+        
+        return str.toString();
     }
     
     
     
     
+    private String createTable(String projectID
+            , String siteID
+            , String gradeLevel
+            , String subjectArea
+    ) {
+        
+        
+        String str = base.loadAsString("C:/GS_ROOT/tables/table_holder_detail.xml");
+    
+        
+        
+        return str;
+    }
 }

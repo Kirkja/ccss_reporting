@@ -143,6 +143,25 @@ public class DocBuilder {
     
     
     
+    public String loadAsString(String fileName) {
+
+        StringBuilder text = new StringBuilder();
+        String NL = System.getProperty("line.separator");
+
+        try (Scanner scanner = new Scanner(new FileInputStream(fileName))) {
+            while (scanner.hasNextLine()) {
+                text.append(scanner.nextLine()).append(NL);
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(DocBuilder.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        
+        String str = text.toString();
+        str = str.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
+        
+        return str;
+    }    
+    
     
     public void ToFile(String path, String name) {
         base.AsFile(path, name);
