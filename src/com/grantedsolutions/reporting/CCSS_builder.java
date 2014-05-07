@@ -410,15 +410,13 @@ public class CCSS_builder {
                     curSchool.setAttribute("bump", "true");
                     System.out.println("\nSchool: " + rs.getString("schname"));                    
                 }
-
                 
                 curSiteID = rs.getString("siteID");
                 curGradeLevel = rs.getString("gradeLevel");
                 curSubjectArea = rs.getString("subjectArea");
             }
             
-            
-            
+                        
             curGrade.appendChild(curSubject);
             curSchool.appendChild(curGrade);
             holder.appendChild(curSchool);
@@ -522,9 +520,7 @@ public class CCSS_builder {
         
         
         String str = base.loadAsString("C:/GS_ROOT/tables/table_holder_detail.xml");
-    
-        
-        
+            
         return str;
     }
 }
