@@ -103,9 +103,7 @@ public class GridToGLA {
         params.put("labels", rowLabels);
         params.put("horizontal-anchor", "left");
         
-        
                
-        
         base.CheckPoint(0d, 0d);
         
         // create the various containers --------------------------------------
